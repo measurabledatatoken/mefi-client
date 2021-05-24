@@ -367,12 +367,4 @@ contract MefiClient is Ownable {
         require(pendingRequests[_requestId] == address(0), "Request is already pending");
         _;
     }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyClientOwner() {
-        require(isOwner(), "Please transfer owner to this account before you call.");
-        _;
-    }
 }
