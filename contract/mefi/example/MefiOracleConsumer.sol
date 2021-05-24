@@ -4,33 +4,38 @@ pragma solidity ^0.6.0;
 import "https://github.com/measurabledatatoken/mefi-client/blob/main/contract/mefi/MefiClient.sol";
 
 contract MefiOracleConsumer is MefiClient {
-    address private oracle;
-    bytes32 private jobId;
+    bytes32 private requestStockPriceJobId = "2cfc1a80981e4a3597b623d07e3ef7ff";
 
-    uint256 public price;
-    uint256 public time;
+    bytes32 public curReqId;
+
+    mapping(bytes32 => uint256) public prices;
+    mapping(bytes32 => uint256) public dates;
 
     constructor() public {
         setPublicMefiToken();
-        setOracle(0xD506A8d3130A0892Fd2556368eC04f3dB60026ae);
-        jobId = "21143a9fbb924b849d303807f3e25eca";
+        setOracleAddress(0x395CeE958F302349Ce4a91EFa0A531Be938Fdb06);
     }
 
-    function setOracle(address _oracle) public {
-        oracle = _oracle;
-        setMefiOracle(oracle);
+    // REQUEST STOCK PRICE JOB
+
+    /**
+     * update Job ID once Oracle contract has been deployed elsewhere again
+     */
+    function setRequestStockPriceJobId(string memory _jobId) onlyOwner public {
+        requestStockPriceJobId = stringToBytes32(_jobId);
     }
 
-    function setJobId(string memory _jobId) public {
-        jobId = stringToBytes32(_jobId);
+    function getRequestStockPriceJobId() public view returns (string memory) {
+        return bytes32ToString(requestStockPriceJobId);
     }
 
     /**
      * Initial request
      */
-    function requestStockPrice(string memory _symbol, uint256 _fee) public {
-        Mefi.Request memory req = buildMefiStockPriceRequest(jobId, _symbol, address(this), this.fulfillStockPrice.selector);
-        sendMefiRequest(req, _fee);
+    function requestStockPrice(string memory _symbol, uint256 _fee) public returns (bytes32) {
+        Mefi.Request memory req = buildMefiStockPriceRequest(requestStockPriceJobId, _symbol, address(this), this.fulfillStockPrice.selector);
+        curReqId = sendMefiRequest(req, _fee);
+        return curReqId;
     }
 
     /**
@@ -38,7 +43,7 @@ contract MefiOracleConsumer is MefiClient {
      */
     function fulfillStockPrice(bytes32 _requestId, bytes32 _result) public recordMefiFulfillment(_requestId) {
         uint[] memory data = readStockPriceWithTime(_result);
-        price = data[0];
-        time = data[1];
+        prices[_requestId] = data[0];
+        dates[_requestId] = data[1];
     }
 }

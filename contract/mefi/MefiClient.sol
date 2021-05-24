@@ -5,14 +5,15 @@ import "./Mefi.sol";
 import "./interfaces/ENSInterface.sol";
 import "./interfaces/MDTTokenInterface.sol";
 import "./interfaces/MefiRequestInterface.sol";
-import { ENSResolver as ENSResolver_Mefi } from "./vendor/ENSResolver.sol";
+import "./vendor/Ownable.sol";
+import {ENSResolver as ENSResolver_Mefi} from "./vendor/ENSResolver.sol";
 
 /**
  * @title The MefiClient contract
  * @notice Contract writers can inherit this contract in order to create requests for the
  * Mefi network
  */
-contract MefiClient {
+contract MefiClient is Ownable {
   using Mefi for Mefi.Request;
 
   uint256 constant internal MDT = 10**18;
@@ -21,7 +22,11 @@ contract MefiClient {
   uint256 constant private ARGS_VERSION = 1;
   bytes32 constant private ENS_TOKEN_SUBNAME = keccak256("mdt");
   bytes32 constant private ENS_ORACLE_SUBNAME = keccak256("oracle");
-  address constant private MDT_TOKEN_ADDRESS = 0xd043d85dF623E6168C6DE5d4728dD2844D9d5B3C; // Rinkeby
+
+  address constant private MDT_TOKEN_ADDRESS_MAINNET = 0x814e0908b12A99FeCf5BC101bB5d0b8B5cDf7d26; // Mainnet
+  address constant private MDT_TOKEN_ADDRESS_RINKEBY = 0xd043d85dF623E6168C6DE5d4728dD2844D9d5B3C; // Rinkeby
+  uint256 constant private CHAIN_ID_MAINNET = 1;
+  uint256 constant private CHAIN_ID_RINKEBY = 4;
 
   ENSInterface private ens;
   bytes32 private ensNode;
@@ -30,9 +35,20 @@ contract MefiClient {
   uint256 private requestCount = 1;
   mapping(bytes32 => address) private pendingRequests;
 
+  address internal oracleAddress;
+
   event MefiRequested(bytes32 indexed id);
   event MefiFulfilled(bytes32 indexed id);
   event MefiCancelled(bytes32 indexed id);
+
+  function setOracleAddress(address _oracleAddress) onlyOwner public {
+    oracleAddress = _oracleAddress;
+    setMefiOracle(oracleAddress);
+  }
+
+  function getOracleAddress() public view returns (address) {
+    return oracleAddress;
+  }
 
   /**
    * @notice Creates a request that can hold additional parameters
@@ -148,12 +164,27 @@ contract MefiClient {
     mdt = MDTTokenInterface(_mdt);
   }
 
+  function getChainID() internal pure returns (uint256) {
+    uint256 id;
+    assembly {
+      id := chainid()
+    }
+    return id;
+  }
+
   /**
    * @notice Sets the mefi token address for the public
    * network as given by the Pointer contract
    */
   function setPublicMefiToken() internal {
-    setMefiToken(MDT_TOKEN_ADDRESS);
+    uint256 chainId = getChainID();
+    require(CHAIN_ID_MAINNET == chainId || CHAIN_ID_RINKEBY == chainId, 'Client is deployed on chain without MDT contract');
+
+    if (CHAIN_ID_MAINNET == chainId) {
+      setMefiToken(MDT_TOKEN_ADDRESS_MAINNET);
+    } else if (CHAIN_ID_RINKEBY == chainId) {
+      setMefiToken(MDT_TOKEN_ADDRESS_RINKEBY);
+    }
   }
 
   /**
@@ -287,7 +318,7 @@ contract MefiClient {
     return data;
   }
 
-  function stringToBytes32(string memory source) public pure returns (bytes32 result) {
+  function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
     bytes memory b = bytes(source);
     if (b.length == 0) {
       return 0x0;
@@ -296,6 +327,23 @@ contract MefiClient {
     assembly {
       result := mload(add(source, 32))
     }
+  }
+
+  function bytes32ToString(bytes32 x) internal pure returns (string memory) {
+    bytes memory bytesString = new bytes(32);
+    uint charCount = 0;
+    for (uint j = 0; j < 32; j++) {
+      byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
+      if (char != 0) {
+        bytesString[charCount] = char;
+        charCount++;
+      }
+    }
+    bytes memory bytesStringTrimmed = new bytes(charCount);
+    for (uint j = 0; j < charCount; j++) {
+      bytesStringTrimmed[j] = bytesString[j];
+    }
+    return string(bytesStringTrimmed);
   }
 
   /**
