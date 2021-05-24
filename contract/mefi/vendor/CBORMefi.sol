@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >= 0.4.19 < 0.7.0;
 
-import { BufferMefi } from "./BufferMefi.sol";
+import {BufferMefi} from "./BufferMefi.sol";
 
 library CBORMefi {
     using BufferMefi for BufferMefi.buffer;
@@ -19,18 +19,18 @@ library CBORMefi {
     uint8 private constant TAG_TYPE_NEGATIVE_BIGNUM = 3;
 
     function encodeType(BufferMefi.buffer memory buf, uint8 major, uint value) private pure {
-        if(value <= 23) {
+        if (value <= 23) {
             buf.appendUint8(uint8((major << 5) | value));
-        } else if(value <= 0xFF) {
+        } else if (value <= 0xFF) {
             buf.appendUint8(uint8((major << 5) | 24));
             buf.appendInt(value, 1);
-        } else if(value <= 0xFFFF) {
+        } else if (value <= 0xFFFF) {
             buf.appendUint8(uint8((major << 5) | 25));
             buf.appendInt(value, 2);
-        } else if(value <= 0xFFFFFFFF) {
+        } else if (value <= 0xFFFFFFFF) {
             buf.appendUint8(uint8((major << 5) | 26));
             buf.appendInt(value, 4);
-        } else if(value <= 0xFFFFFFFFFFFFFFFF) {
+        } else if (value <= 0xFFFFFFFFFFFFFFFF) {
             buf.appendUint8(uint8((major << 5) | 27));
             buf.appendInt(value, 8);
         }
@@ -45,14 +45,14 @@ library CBORMefi {
     }
 
     function encodeInt(BufferMefi.buffer memory buf, int value) internal pure {
-        if(value < -0x10000000000000000) {
+        if (value < - 0x10000000000000000) {
             encodeSignedBigNum(buf, value);
-        } else if(value > 0xFFFFFFFFFFFFFFFF) {
+        } else if (value > 0xFFFFFFFFFFFFFFFF) {
             encodeBigNum(buf, value);
-        } else if(value >= 0) {
+        } else if (value >= 0) {
             encodeType(buf, MAJOR_TYPE_INT, uint(value));
         } else {
-            encodeType(buf, MAJOR_TYPE_NEGATIVE_INT, uint(-1 - value));
+            encodeType(buf, MAJOR_TYPE_NEGATIVE_INT, uint(- 1 - value));
         }
     }
 
@@ -62,13 +62,13 @@ library CBORMefi {
     }
 
     function encodeBigNum(BufferMefi.buffer memory buf, int value) internal pure {
-      buf.appendUint8(uint8((MAJOR_TYPE_TAG << 5) | TAG_TYPE_BIGNUM));
-      encodeBytes(buf, abi.encode(uint(value)));
+        buf.appendUint8(uint8((MAJOR_TYPE_TAG << 5) | TAG_TYPE_BIGNUM));
+        encodeBytes(buf, abi.encode(uint(value)));
     }
 
     function encodeSignedBigNum(BufferMefi.buffer memory buf, int input) internal pure {
-      buf.appendUint8(uint8((MAJOR_TYPE_TAG << 5) | TAG_TYPE_NEGATIVE_BIGNUM));
-      encodeBytes(buf, abi.encode(uint(-1 - input)));
+        buf.appendUint8(uint8((MAJOR_TYPE_TAG << 5) | TAG_TYPE_NEGATIVE_BIGNUM));
+        encodeBytes(buf, abi.encode(uint(- 1 - input)));
     }
 
     function encodeString(BufferMefi.buffer memory buf, string memory value) internal pure {
