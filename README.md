@@ -9,19 +9,19 @@
   Mainnet:
     Oracle:
       0x7779F290101E5591Baf864901861D9788C0c252c
-    Job ID:
+    Job ID(Request Stock Price):
       0ff87c6ffcc845f388d42ba4915be595
   ```
   
   ```
   Rinkeby:
     Oracle:
-      0xD506A8d3130A0892Fd2556368eC04f3dB60026ae
-    Job ID:
-      21143a9fbb924b849d303807f3e25eca
+      0x395CeE958F302349Ce4a91EFa0A531Be938Fdb06
+    Job ID(Request Stock Price):
+      2cfc1a80981e4a3597b623d07e3ef7ff
   ```
 
-  Don't worry if you get it wrong accidently, you can update it by invoking `setOracle` or `setJobId`, but it'll cost you some gas fee.
+  Don't worry if you get it wrong accidently, you can update it by invoking `setOracleAddress` or `setRequestStockPriceJobId`, but it'll cost you some gas fee.
   
   If you don't want your source code published, do save the code snippet you deployed, you can use Remix service to generate its corresponding ABI json file to interact with your contract later.
   
