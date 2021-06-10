@@ -8,9 +8,9 @@
   ```
   Mainnet:
     Oracle:
-      0x7779F290101E5591Baf864901861D9788C0c252c
+      0x66C22dC23fEe2D972BE1D72cE6C04986290BC4fE
     Job ID(Request Stock Price):
-      0ff87c6ffcc845f388d42ba4915be595
+      770dc00f53d94d56b062b5843a18e21c
   ```
   
   ```
