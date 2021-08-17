@@ -288,7 +288,7 @@ contract MefiClient is Ownable {
         // solhint-disable-next-line no-empty-blocks
     {}
 
-    function readStockPriceWithTime(bytes32 x) internal pure returns (uint[] memory) {
+    function readStockPriceWithTime(bytes32 x) internal pure returns (string[] memory) {
         bytes memory bytesString = new bytes(32);
         uint len = 0;
         for (uint i = 0; i < 32; i++) {
@@ -298,24 +298,51 @@ contract MefiClient is Ownable {
             }
         }
 
-        uint count = 2;
-        uint[] memory data = new uint[](count);
-        for (uint i = 0; i < count; i++) {
-            data[i] = 0;
-        }
+        uint count = 3;
+        string[] memory data = new string[](count);
         uint index = 0;
-        for (uint i = 0; i < len || count < 2; i++) {
-            uint c = uint(uint8(bytesString[i]));
-            if (c >= 48 && c <= 57) {
-                data[index] = data[index] * 10 + c - 48;
-            } else {
-                if (data[index] > 0) {
-                    index++;
+        // price & timestamp are integers, currency as a string will follow behind
+        for (uint i = 0; i < len || index < 2;) {
+            uint c = getCharAt(bytesString, i);
+            // TODO: actually can match pattern as bytes32 to reduce cost
+            if (isDigit(c)) {// \d
+                //                data[index] = data[index] * 10 + c - 48;
+                for (uint j = 0; i + j < len - 1; j++) {// find the ending digit
+                    uint nextC = getCharAt(bytesString, i + j + 1);
+                    if (!isDigit(nextC)) {
+                        data[index] = bytesToString(bytesString, i, j + 1);
+                        i += j;
+                        break;
+                    }
+                }
+                //            } else if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) { // \w // will not encounter alphabet without encountering double quote first
+            } else if (44 == c) {// comma as array separator
+                index++;
+            } else if (34 == c) {// double quote for string-type field
+                for (uint j = 1; i + j < len; j++) {// find the paired closing quote
+                    uint nextC = getCharAt(bytesString, i + j);
+                    if (34 == nextC) {
+                        if (1 == j) {
+                            data[index] = "";
+                        } else {
+                            data[index] = bytesToString(bytesString, i, j - 1);
+                        }
+                        i += j;
+                    }
                 }
             }
+            i++;
         }
 
         return data;
+    }
+
+    function getCharAt(bytes memory str, uint pos) internal pure returns (uint) {
+        return uint(uint8(str[pos]));
+    }
+
+    function isDigit(uint char) internal pure returns (bool) {
+        return char >= 48 && char <= 57;
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
@@ -339,11 +366,16 @@ contract MefiClient is Ownable {
                 charCount++;
             }
         }
-        bytes memory bytesStringTrimmed = new bytes(charCount);
-        for (uint j = 0; j < charCount; j++) {
-            bytesStringTrimmed[j] = bytesString[j];
+
+        return bytesToString(bytesString, 0, charCount);
+    }
+
+    function bytesToString(bytes memory bytesString, uint start, uint len) internal pure returns (string memory) {
+        bytes memory substring = new bytes(len);
+        for (uint j = 0; j < len; j++) {
+            substring[j] = bytesString[start + j];
         }
-        return string(bytesStringTrimmed);
+        return string(substring);
     }
 
     /**
