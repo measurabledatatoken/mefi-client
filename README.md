@@ -1,11 +1,15 @@
 # mefi-client
 
 
-  We provide an [example](https://github.com/measurabledatatoken/mefi-client/blob/main/contract/mefi/example/MefiOracleConsumer.sol) demonstrate how to work with MeFi Oracle.
+  We provide an [example](https://github.com/measurabledatatoken/mefi-client/blob/main/contract/mefi/example/MefiOracleConsumer.sol) demonstrate how to work with MeFi Oracle in Rinkeby testnet.
   
   Before you deploy your own client contract, please notice there'll be different addresses of Oracle contracts and different job IDs for different chains. You need to verify whether the environment of Oracle and JobID you specify in contructor belongs to the chain you deploy on or not. Right now MeFi Oracle is deployed on Mainnet and Rinkeby only. 
   
-  ```
+  You can simply replace `MefiRinkebyConfig` with `MefiMainnetConfig` to switch it to mainnet environment.
+
+  Don't worry if you get it wrong accidently, you can update it by invoking `setOracleAddress` or `setRequestStockPriceJobId`, but it'll cost you some gas fee.
+  
+    ```
   Mainnet:
     Oracle:
       0x66C22dC23fEe2D972BE1D72cE6C04986290BC4fE
@@ -20,8 +24,6 @@
     Job ID(Request Stock Price):
       2cfc1a80981e4a3597b623d07e3ef7ff
   ```
-
-  Don't worry if you get it wrong accidently, you can update it by invoking `setOracleAddress` or `setRequestStockPriceJobId`, but it'll cost you some gas fee.
   
   If you don't want your source code published, do save the code snippet you deployed, you can use Remix service to generate its corresponding ABI json file to interact with your contract later.
   
