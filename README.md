@@ -9,7 +9,7 @@
 
   Don't worry if you get it wrong accidently, you can update it by invoking `setOracleAddress` or `setRequestStockPriceJobId`, but it'll cost you some gas fee.
   
-    ```
+  ```
   Mainnet:
     Oracle:
       0x66C22dC23fEe2D972BE1D72cE6C04986290BC4fE
