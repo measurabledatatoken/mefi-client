@@ -6,4 +6,5 @@ interface MefiChainConfig {
     function tokenAddr() external view returns (address);
     function oracleAddr() external view returns (address);
     function requestStockPriceJobId() external view returns (bytes32);
+    function requestStockPriceJobFee() external view returns (uint256);
 }

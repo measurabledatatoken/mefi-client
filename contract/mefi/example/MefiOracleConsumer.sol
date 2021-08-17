@@ -13,7 +13,6 @@ contract MefiOracleConsumer is MefiClient, MefiRinkebyConfig {
 
     constructor() public {
         setPublicMefiToken();
-
         setOracleAddress(oracleAddr);
     }
 
@@ -33,9 +32,9 @@ contract MefiOracleConsumer is MefiClient, MefiRinkebyConfig {
     /**
      * Initial request
      */
-    function requestStockPrice(string memory _symbol, uint256 _fee) public returns (bytes32) {
+    function requestStockPrice(string memory _symbol) public returns (bytes32) {
         Mefi.Request memory req = buildMefiStockPriceRequest(requestStockPriceJobId, _symbol, address(this), this.fulfillStockPrice.selector);
-        curReqId = sendMefiRequest(req, _fee);
+        curReqId = sendMefiRequest(req, requestStockPriceJobFee);
         return curReqId;
     }
 
