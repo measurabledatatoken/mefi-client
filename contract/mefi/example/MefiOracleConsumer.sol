@@ -2,18 +2,19 @@
 pragma solidity ^0.6.0;
 
 import "https://github.com/measurabledatatoken/mefi-client/blob/main/contract/mefi/MefiClient.sol";
+import "https://github.com/measurabledatatoken/mefi-client/blob/main/contract/mefi/chains/MefiRinkebyConfig.sol";
 
-contract MefiOracleConsumer is MefiClient {
-    bytes32 private requestStockPriceJobId = "2cfc1a80981e4a3597b623d07e3ef7ff";
-
+contract MefiOracleConsumer is MefiClient, MefiRinkebyConfig {
     bytes32 public curReqId;
 
-    mapping(bytes32 => uint256) public prices;
-    mapping(bytes32 => uint256) public dates;
+    mapping(bytes32 => string) public prices;
+    mapping(bytes32 => string) public currencies;
+    mapping(bytes32 => string) public dates;
 
     constructor() public {
         setPublicMefiToken();
-        setOracleAddress(0x395CeE958F302349Ce4a91EFa0A531Be938Fdb06);
+
+        setOracleAddress(oracleAddr);
     }
 
     // REQUEST STOCK PRICE JOB
@@ -25,7 +26,7 @@ contract MefiOracleConsumer is MefiClient {
         requestStockPriceJobId = stringToBytes32(_jobId);
     }
 
-    function getRequestStockPriceJobId() public view returns (string memory) {
+    function getRequestStockPriceJobIdString() public view returns (string memory) {
         return bytes32ToString(requestStockPriceJobId);
     }
 
@@ -42,8 +43,9 @@ contract MefiOracleConsumer is MefiClient {
      * Callback function
      */
     function fulfillStockPrice(bytes32 _requestId, bytes32 _result) public recordMefiFulfillment(_requestId) {
-        uint[] memory data = readStockPriceWithTime(_result);
+        string[] memory data = readStockPriceWithTime(_result);
         prices[_requestId] = data[0];
         dates[_requestId] = data[1];
+        currencies[_requestId] = data[2];
     }
 }
