@@ -25,8 +25,10 @@ contract MefiClient is Ownable {
 
     address constant private MDT_TOKEN_ADDRESS_MAINNET = 0x814e0908b12A99FeCf5BC101bB5d0b8B5cDf7d26; // Mainnet
     address constant private MDT_TOKEN_ADDRESS_RINKEBY = 0xd043d85dF623E6168C6DE5d4728dD2844D9d5B3C; // Rinkeby
+    address constant private MDT_TOKEN_ADDRESS_BSC_TESTNET = 0xd043d85dF623E6168C6DE5d4728dD2844D9d5B3C; // BSC Testnet
     uint256 constant private CHAIN_ID_MAINNET = 1;
     uint256 constant private CHAIN_ID_RINKEBY = 4;
+    uint256 constant private CHAIN_ID_BSC_TESTNET = 97;
 
     ENSInterface private ens;
     bytes32 private ensNode;
@@ -178,12 +180,14 @@ contract MefiClient is Ownable {
      */
     function setPublicMefiToken() internal {
         uint256 chainId = getChainID();
-        require(CHAIN_ID_MAINNET == chainId || CHAIN_ID_RINKEBY == chainId, 'Client is deployed on chain without MDT contract');
+        require(CHAIN_ID_MAINNET == chainId || CHAIN_ID_RINKEBY == chainId || CHAIN_ID_BSC_TESTNET == chainId, 'Client is deployed on chain without MDT contract');
 
         if (CHAIN_ID_MAINNET == chainId) {
             setMefiToken(MDT_TOKEN_ADDRESS_MAINNET);
         } else if (CHAIN_ID_RINKEBY == chainId) {
             setMefiToken(MDT_TOKEN_ADDRESS_RINKEBY);
+        } else if (CHAIN_ID_BSC_TESTNET == chainId) {
+            setMefiToken(MDT_TOKEN_ADDRESS_BSC_TESTNET);
         }
     }
 
