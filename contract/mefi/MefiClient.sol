@@ -329,7 +329,7 @@ contract MefiClient is Ownable {
                         if (1 == j) {
                             data[index] = "";
                         } else {
-                            data[index] = bytesToString(bytesString, i, j - 1);
+                            data[index] = bytesToString(bytesString, i + 1, j - 1);
                         }
                         i += j;
                     }
