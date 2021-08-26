@@ -345,8 +345,9 @@ contract MefiClient is Ownable {
         return uint(uint8(str[pos]));
     }
 
+    // is number component
     function isDigit(uint char) internal pure returns (bool) {
-        return char >= 48 && char <= 57;
+        return (char >= 48 && char <= 57) || char == 46;
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
